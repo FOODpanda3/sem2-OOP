@@ -8,10 +8,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-/**
- *
- * @author YANGYANG_CPE121
- */
+
 public class StudentRegistrationForm extends javax.swing.JFrame {
 
     /**
