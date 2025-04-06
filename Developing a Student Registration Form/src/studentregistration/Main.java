@@ -4,10 +4,7 @@
  */
 package studentregistration;
 
-/**
- *
- * @author YANGYANG_CPE121
- */
+
 public class Main {
 
     /**
