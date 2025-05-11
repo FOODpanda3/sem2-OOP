@@ -5,9 +5,11 @@
 package inventorymanagementsystem;
 
 import inventorymanagementsystem.DBConnection;
-import java.nio.channels.ConnectionPendingException;
+
 import javax.swing.JOptionPane;
 import java.sql.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -23,7 +25,7 @@ public class management extends javax.swing.JFrame {
          getAllCategory();
     }
     private void loadProducts() {
-   String query = "SELECT * FROM products";
+    String query = "SELECT * FROM products";
         try (Connection conn = DBConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
@@ -43,39 +45,37 @@ public class management extends javax.swing.JFrame {
         }
 }
 private void getAllCategory (){
-   if (category == null) {
-        return;
-    }
+    category.removeAllItems();
+        category.addItem("Select Category");
 
-    category.removeAllItems(); 
-    category.addItem("Select Category");
-
-    String query = "SELECT DISTINCT category FROM products";
-    try (Connection conn = DBConnection.getConnection();
-         Statement stmt = conn.createStatement();
-         ResultSet rs = stmt.executeQuery(query)) {
-        
-        boolean hasCategories = false; 
-        
-        while (rs.next()) {
-            String categoryName = rs.getString("category");
-            category.addItem(categoryName); 
-            hasCategories = true;
-            System.out.println("Fetched Category: " + categoryName);
+        String query = "SELECT DISTINCT category FROM products";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+            while (rs.next()) {
+                category.addItem(rs.getString("category"));
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error fetching categories: " + e.getMessage());
         }
-
-        if (!hasCategories) {
-            System.out.println("⚠ No categories found in the database.");
-        }
-
-    } catch (SQLException e) {
-        e.printStackTrace();
-        JOptionPane.showMessageDialog(null, "Error fetching categories: " + e.getMessage());
-    }
 }
+ private void addTableSelectionListener() {
+        jTable1.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                int selectedRow = jTable1.getSelectedRow();
+                if (selectedRow >= 0) {
+                    itemname.setText(jTable1.getValueAt(selectedRow, 1).toString());
+                    category.setSelectedItem(jTable1.getValueAt(selectedRow, 2).toString());
+                    price.setText(jTable1.getValueAt(selectedRow, 3).toString());
+                    quantity.setText(jTable1.getValueAt(selectedRow, 4).toString());
+                }
+            }
+        });
+    }
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -91,12 +91,14 @@ private void getAllCategory (){
         update = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
         category = new javax.swing.JComboBox<>();
+        jTextField1 = new javax.swing.JTextField();
+        search = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel1.setBackground(new java.awt.Color(204, 204, 204));
-        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        jPanel1.setLayout(new java.awt.GridBagLayout());
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -119,37 +121,88 @@ private void getAllCategory (){
         });
         jScrollPane1.setViewportView(jTable1);
 
-        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 16, 590, 610));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridheight = 10;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 664;
+        gridBagConstraints.ipady = 490;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(37, 20, 30, 0);
+        jPanel1.add(jScrollPane1, gridBagConstraints);
 
         jLabel1.setText("PRODUCT:");
-        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 40, 90, -1));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.ipadx = 35;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(37, 20, 0, 0);
+        jPanel1.add(jLabel1, gridBagConstraints);
 
         itemname.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 itemnameActionPerformed(evt);
             }
         });
-        jPanel1.add(itemname, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 60, 300, -1));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 6;
+        gridBagConstraints.ipadx = 236;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(4, 20, 0, 50);
+        jPanel1.add(itemname, gridBagConstraints);
 
         jLabel2.setText("PRICE:");
-        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 100, -1, -1));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(18, 20, 0, 0);
+        jPanel1.add(jLabel2, gridBagConstraints);
 
         price.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 priceActionPerformed(evt);
             }
         });
-        jPanel1.add(price, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 120, 300, -1));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridwidth = 6;
+        gridBagConstraints.ipadx = 236;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(4, 20, 0, 50);
+        jPanel1.add(price, gridBagConstraints);
 
         jLabel3.setText("Category");
-        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 220, -1, -1));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(18, 20, 0, 0);
+        jPanel1.add(jLabel3, gridBagConstraints);
 
         quantity.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 quantityActionPerformed(evt);
             }
         });
-        jPanel1.add(quantity, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 180, 300, -1));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridwidth = 6;
+        gridBagConstraints.ipadx = 236;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(4, 20, 0, 50);
+        jPanel1.add(quantity, gridBagConstraints);
 
         delete.setText("DELETE");
         delete.addActionListener(new java.awt.event.ActionListener() {
@@ -157,7 +210,14 @@ private void getAllCategory (){
                 deleteActionPerformed(evt);
             }
         });
-        jPanel1.add(delete, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 370, 90, 50));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 8;
+        gridBagConstraints.gridy = 10;
+        gridBagConstraints.ipadx = 18;
+        gridBagConstraints.ipady = 27;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(98, 10, 0, 50);
+        jPanel1.add(delete, gridBagConstraints);
 
         save1.setText("SAVE");
         save1.addActionListener(new java.awt.event.ActionListener() {
@@ -165,7 +225,15 @@ private void getAllCategory (){
                 save1ActionPerformed(evt);
             }
         });
-        jPanel1.add(save1, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 370, 90, 50));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.ipadx = 18;
+        gridBagConstraints.ipady = 27;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(98, 20, 0, 0);
+        jPanel1.add(save1, gridBagConstraints);
 
         update.setText("UPDATE");
         update.addActionListener(new java.awt.event.ActionListener() {
@@ -173,13 +241,60 @@ private void getAllCategory (){
                 updateActionPerformed(evt);
             }
         });
-        jPanel1.add(update, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 370, 90, 50));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 7;
+        gridBagConstraints.gridy = 10;
+        gridBagConstraints.ipadx = 16;
+        gridBagConstraints.ipady = 27;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(98, 20, 0, 0);
+        jPanel1.add(update, gridBagConstraints);
 
         jLabel4.setText("QUANTITY:");
-        jPanel1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 160, -1, -1));
-        jPanel1.add(category, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 250, 300, -1));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(18, 20, 0, 0);
+        jPanel1.add(jLabel4, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridwidth = 6;
+        gridBagConstraints.ipadx = 228;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(14, 20, 0, 50);
+        jPanel1.add(category, gridBagConstraints);
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 920, 640));
+        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField1ActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.ipadx = 276;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(50, 60, 0, 0);
+        jPanel1.add(jTextField1, gridBagConstraints);
+
+        search.setText("search");
+        search.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(50, 80, 0, 0);
+        jPanel1.add(search, gridBagConstraints);
+
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(-10, 0, 1070, 650));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -197,12 +312,12 @@ private void getAllCategory (){
     }//GEN-LAST:event_quantityActionPerformed
 
     private void save1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_save1ActionPerformed
-   String name = itemname.getText();
+  String name = itemname.getText();
         String priceText = price.getText();
         String quantityText = quantity.getText();
         String selectedCategory = (String) category.getSelectedItem();
 
-        if (name.isEmpty() || priceText.isEmpty() || quantityText.isEmpty() || selectedCategory == null || selectedCategory.equals("Select Category")) {
+        if (name.isEmpty() || priceText.isEmpty() || quantityText.isEmpty() || selectedCategory.equals("Select Category")) {
             JOptionPane.showMessageDialog(null, "Please fill all fields and select a valid category.");
             return;
         }
@@ -210,7 +325,7 @@ private void getAllCategory (){
         try {
             double priceValue = Double.parseDouble(priceText);
             int quantityValue = Integer.parseInt(quantityText);
-            
+
             String query = "INSERT INTO products (item_name, price, quantity, category) VALUES (?, ?, ?, ?)";
             try (Connection conn = DBConnection.getConnection();
                  PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -228,14 +343,15 @@ private void getAllCategory (){
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
         }
-itemname.setText("");
-price.setText("");
-quantity.setText("");
-category.setSelectedIndex(0);
+
+        itemname.setText("");
+        price.setText("");
+        quantity.setText("");
+        category.setSelectedItem("Select Category");
     }//GEN-LAST:event_save1ActionPerformed
 
     private void updateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateActionPerformed
-         int selectedRow = jTable1.getSelectedRow();
+            int selectedRow = jTable1.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(null, "Please select a product to update.");
             return;
@@ -247,7 +363,7 @@ category.setSelectedIndex(0);
         String quantityText = quantity.getText();
         String selectedCategory = (String) category.getSelectedItem();
 
-        if (name.isEmpty() || priceText.isEmpty() || quantityText.isEmpty() || selectedCategory == null || selectedCategory.equals("Select Category")) {
+        if (name.isEmpty() || priceText.isEmpty() || quantityText.isEmpty() || selectedCategory.equals("Select Category")) {
             JOptionPane.showMessageDialog(null, "Please fill all fields and select a valid category.");
             return;
         }
@@ -274,11 +390,10 @@ category.setSelectedIndex(0);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
         }
-    
     }//GEN-LAST:event_updateActionPerformed
 
     private void deleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteActionPerformed
-       int selectedRow = jTable1.getSelectedRow();
+           int selectedRow = jTable1.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(null, "Please select a product to delete.");
             return;
@@ -298,13 +413,50 @@ category.setSelectedIndex(0);
                 pstmt.executeUpdate();
                 JOptionPane.showMessageDialog(null, "Product deleted successfully!");
                 loadProducts();
+                getAllCategory();
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
         }
     
-    
     }//GEN-LAST:event_deleteActionPerformed
+
+    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField1ActionPerformed
+
+    private void searchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchActionPerformed
+        String searchText = jTextField1.getText().trim();
+
+    if (searchText.isEmpty()) {
+        loadProducts(); 
+        return;
+    }
+
+    String query = "SELECT * FROM products WHERE item_name LIKE ?";
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+        pstmt.setString(1, "%" + searchText + "%"); 
+
+        try (ResultSet rs = pstmt.executeQuery()) {
+            DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+            model.setRowCount(0); 
+
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getInt("id"),
+                    rs.getString("item_name"),
+                    rs.getString("category"),
+                    rs.getDouble("price"),
+                    rs.getInt("quantity")
+                });
+            }
+        }
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(null, "Error during search: " + e.getMessage());
+    }
+    }//GEN-LAST:event_searchActionPerformed
 
     /**
      * @param args the command line arguments
@@ -352,9 +504,11 @@ category.setSelectedIndex(0);
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
+    private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField price;
     private javax.swing.JTextField quantity;
     private javax.swing.JButton save1;
+    private javax.swing.JButton search;
     private javax.swing.JButton update;
     // End of variables declaration//GEN-END:variables
 }
