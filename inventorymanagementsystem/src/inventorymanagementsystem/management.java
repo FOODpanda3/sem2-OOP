@@ -91,8 +91,6 @@ private void getAllCategory (){
         update = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
         category = new javax.swing.JComboBox<>();
-        jTextField1 = new javax.swing.JTextField();
-        search = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -267,33 +265,6 @@ private void getAllCategory (){
         gridBagConstraints.insets = new java.awt.Insets(14, 20, 0, 50);
         jPanel1.add(category, gridBagConstraints);
 
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipadx = 276;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(50, 60, 0, 0);
-        jPanel1.add(jTextField1, gridBagConstraints);
-
-        search.setText("search");
-        search.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                searchActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridheight = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(50, 80, 0, 0);
-        jPanel1.add(search, gridBagConstraints);
-
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(-10, 0, 1070, 650));
 
         pack();
@@ -421,43 +392,6 @@ private void getAllCategory (){
     
     }//GEN-LAST:event_deleteActionPerformed
 
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField1ActionPerformed
-
-    private void searchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchActionPerformed
-        String searchText = jTextField1.getText().trim();
-
-    if (searchText.isEmpty()) {
-        loadProducts(); 
-        return;
-    }
-
-    String query = "SELECT * FROM products WHERE item_name LIKE ?";
-    try (Connection conn = DBConnection.getConnection();
-         PreparedStatement pstmt = conn.prepareStatement(query)) {
-
-        pstmt.setString(1, "%" + searchText + "%"); 
-
-        try (ResultSet rs = pstmt.executeQuery()) {
-            DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-            model.setRowCount(0); 
-
-            while (rs.next()) {
-                model.addRow(new Object[]{
-                    rs.getInt("id"),
-                    rs.getString("item_name"),
-                    rs.getString("category"),
-                    rs.getDouble("price"),
-                    rs.getInt("quantity")
-                });
-            }
-        }
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(null, "Error during search: " + e.getMessage());
-    }
-    }//GEN-LAST:event_searchActionPerformed
-
     /**
      * @param args the command line arguments
      */
@@ -504,11 +438,9 @@ private void getAllCategory (){
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField price;
     private javax.swing.JTextField quantity;
     private javax.swing.JButton save1;
-    private javax.swing.JButton search;
     private javax.swing.JButton update;
     // End of variables declaration//GEN-END:variables
 }
