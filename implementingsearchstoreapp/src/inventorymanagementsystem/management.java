@@ -4,10 +4,11 @@
  */
 package inventorymanagementsystem;
 
-import inventorymanagementsystem.DBConnection;
 
 import javax.swing.JOptionPane;
 import java.sql.*;
+import java.util.HashSet;
+import java.util.Set;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -23,6 +24,7 @@ public class management extends javax.swing.JFrame {
         setLocationRelativeTo(null);
          loadProducts(); 
          getAllCategory();
+          addTableSelectionListener();
     }
     private void loadProducts() {
     String query = "SELECT * FROM products";
@@ -45,19 +47,24 @@ public class management extends javax.swing.JFrame {
         }
 }
 private void getAllCategory (){
+     Set<String> categories = new HashSet<>();
     category.removeAllItems();
-        category.addItem("Select Category");
+    category.addItem("Select Category");
 
-        String query = "SELECT DISTINCT category FROM products";
-        try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
-            while (rs.next()) {
-                category.addItem(rs.getString("category"));
+    String query = "SELECT DISTINCT category FROM products";
+    try (Connection conn = DBConnection.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery(query)) {
+        while (rs.next()) {
+            String cat = rs.getString("category");
+            if (categories.add(cat)) {
+                category.addItem(cat);
             }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error fetching categories: " + e.getMessage());
         }
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(null, "Error fetching categories: " + e.getMessage());
+    }
+
 }
  private void addTableSelectionListener() {
         jTable1.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -72,10 +79,42 @@ private void getAllCategory (){
             }
         });
     }
+ private void performSearch(String searchText) {
+    String query = "SELECT * FROM products WHERE item_name LIKE ?";
+    
+    // If search text is empty, load all products
+    if (searchText.isEmpty()) {
+        loadProducts();  // You should have a loadProducts method that loads all data.
+        return;
+    }
+
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(query)) {
+        
+        pstmt.setString(1, "%" + searchText + "%"); // Use LIKE to search for partial matches
+
+        try (ResultSet rs = pstmt.executeQuery()) {
+            DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+            model.setRowCount(0);  // Clear the table before adding new data
+
+            // Iterate through the results and add them to the table
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getInt("id"),
+                    rs.getString("item_name"),
+                    rs.getString("category"),
+                    rs.getDouble("price"),
+                    rs.getInt("quantity")
+                });
+            }
+        }
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(null, "Error during search: " + e.getMessage());
+    }
+}
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
 
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -93,12 +132,13 @@ private void getAllCategory (){
         category = new javax.swing.JComboBox<>();
         jTextField1 = new javax.swing.JTextField();
         search = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel1.setBackground(new java.awt.Color(204, 204, 204));
-        jPanel1.setLayout(new java.awt.GridBagLayout());
+        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -121,88 +161,37 @@ private void getAllCategory (){
         });
         jScrollPane1.setViewportView(jTable1);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.gridheight = 10;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.ipadx = 664;
-        gridBagConstraints.ipady = 490;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(37, 20, 30, 0);
-        jPanel1.add(jScrollPane1, gridBagConstraints);
+        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 110, 680, 510));
 
         jLabel1.setText("PRODUCT:");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 4;
-        gridBagConstraints.ipadx = 35;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(37, 20, 0, 0);
-        jPanel1.add(jLabel1, gridBagConstraints);
+        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 110, 90, -1));
 
         itemname.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 itemnameActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.gridwidth = 6;
-        gridBagConstraints.ipadx = 236;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 20, 0, 50);
-        jPanel1.add(itemname, gridBagConstraints);
+        jPanel1.add(itemname, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 130, 300, -1));
 
         jLabel2.setText("PRICE:");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(18, 20, 0, 0);
-        jPanel1.add(jLabel2, gridBagConstraints);
+        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 170, -1, -1));
 
         price.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 priceActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 5;
-        gridBagConstraints.gridwidth = 6;
-        gridBagConstraints.ipadx = 236;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 20, 0, 50);
-        jPanel1.add(price, gridBagConstraints);
+        jPanel1.add(price, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 190, 300, -1));
 
         jLabel3.setText("Category");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 8;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(18, 20, 0, 0);
-        jPanel1.add(jLabel3, gridBagConstraints);
+        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 290, -1, -1));
 
         quantity.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 quantityActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 7;
-        gridBagConstraints.gridwidth = 6;
-        gridBagConstraints.ipadx = 236;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 20, 0, 50);
-        jPanel1.add(quantity, gridBagConstraints);
+        jPanel1.add(quantity, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 250, 300, -1));
 
         delete.setText("DELETE");
         delete.addActionListener(new java.awt.event.ActionListener() {
@@ -210,14 +199,7 @@ private void getAllCategory (){
                 deleteActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 8;
-        gridBagConstraints.gridy = 10;
-        gridBagConstraints.ipadx = 18;
-        gridBagConstraints.ipady = 27;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(98, 10, 0, 50);
-        jPanel1.add(delete, gridBagConstraints);
+        jPanel1.add(delete, new org.netbeans.lib.awtextra.AbsoluteConstraints(930, 440, 90, 50));
 
         save1.setText("SAVE");
         save1.addActionListener(new java.awt.event.ActionListener() {
@@ -225,15 +207,7 @@ private void getAllCategory (){
                 save1ActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 10;
-        gridBagConstraints.gridwidth = 4;
-        gridBagConstraints.ipadx = 18;
-        gridBagConstraints.ipady = 27;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(98, 20, 0, 0);
-        jPanel1.add(save1, gridBagConstraints);
+        jPanel1.add(save1, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 440, 90, 50));
 
         update.setText("UPDATE");
         update.addActionListener(new java.awt.event.ActionListener() {
@@ -241,44 +215,18 @@ private void getAllCategory (){
                 updateActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 7;
-        gridBagConstraints.gridy = 10;
-        gridBagConstraints.ipadx = 16;
-        gridBagConstraints.ipady = 27;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(98, 20, 0, 0);
-        jPanel1.add(update, gridBagConstraints);
+        jPanel1.add(update, new org.netbeans.lib.awtextra.AbsoluteConstraints(830, 440, 90, 50));
 
         jLabel4.setText("QUANTITY:");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 6;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(18, 20, 0, 0);
-        jPanel1.add(jLabel4, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 9;
-        gridBagConstraints.gridwidth = 6;
-        gridBagConstraints.ipadx = 228;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(14, 20, 0, 50);
-        jPanel1.add(category, gridBagConstraints);
+        jPanel1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 230, -1, -1));
+        jPanel1.add(category, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 320, 300, -1));
 
         jTextField1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextField1ActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipadx = 276;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(50, 60, 0, 0);
-        jPanel1.add(jTextField1, gridBagConstraints);
+        jPanel1.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 50, 340, -1));
 
         search.setText("search");
         search.addActionListener(new java.awt.event.ActionListener() {
@@ -286,13 +234,15 @@ private void getAllCategory (){
                 searchActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridheight = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(50, 80, 0, 0);
-        jPanel1.add(search, gridBagConstraints);
+        jPanel1.add(search, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 50, -1, -1));
+
+        jButton1.setText("clear");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 50, 80, -1));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(-10, 0, 1070, 650));
 
@@ -426,37 +376,14 @@ private void getAllCategory (){
     }//GEN-LAST:event_jTextField1ActionPerformed
 
     private void searchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchActionPerformed
-        String searchText = jTextField1.getText().trim();
-
-    if (searchText.isEmpty()) {
-        loadProducts(); 
-        return;
-    }
-
-    String query = "SELECT * FROM products WHERE item_name LIKE ?";
-    try (Connection conn = DBConnection.getConnection();
-         PreparedStatement pstmt = conn.prepareStatement(query)) {
-
-        pstmt.setString(1, "%" + searchText + "%"); 
-
-        try (ResultSet rs = pstmt.executeQuery()) {
-            DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-            model.setRowCount(0); 
-
-            while (rs.next()) {
-                model.addRow(new Object[]{
-                    rs.getInt("id"),
-                    rs.getString("item_name"),
-                    rs.getString("category"),
-                    rs.getDouble("price"),
-                    rs.getInt("quantity")
-                });
-            }
-        }
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(null, "Error during search: " + e.getMessage());
-    }
+          String searchText = jTextField1.getText().trim().toLowerCase();
+    performSearch(searchText);
     }//GEN-LAST:event_searchActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+jTextField1.setText(""); 
+    loadProducts();         
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -497,6 +424,7 @@ private void getAllCategory (){
     private javax.swing.JComboBox<String> category;
     private javax.swing.JButton delete;
     private javax.swing.JTextField itemname;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

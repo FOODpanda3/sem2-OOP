@@ -14,7 +14,8 @@ public class Inventorymanagementsystem {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-      
+       new management().setVisible(true);       
+    
     }
     
 }
